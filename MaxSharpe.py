@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 
 
 # Performance of your Portfolio
-TICKERS =['BIL', 'GLD', 'TLT', 'SPY']
+TICKERS =['SPY', 'GLD', 'TLT', 'DBC', 'IEF', 'BTC-USD']
 
 def getData(stocks, start, end):
     stockData = pdr.get_data_yahoo(stocks, start=start, end=end)
@@ -39,7 +39,7 @@ def portfolioPerformance(weights, meanReturns, covMatrix):
 
     
 stocks = [stock for stock in TICKERS]
-weights = np.array([0.25, 0.25, 0.25, 0.25])
+weights = np.array([0.30, 0.40, 0.15, 0.075, 0.070, 0.005])
 
 # Seleziona il periodo del tuo investimento e fai che combaci con quello in History Prices
 endDate = dt.datetime(2022,5,27)
@@ -112,27 +112,37 @@ print(f'Expected returns for each stock: {mu} \n')
 S = risk_models.CovarianceShrinkage(df.set_index('Date')).ledoit_wolf()
 
 # Weights between 0 and 1 - we don't allow shorting
-ef = EfficientFrontier(mu, S, weight_bounds=(0, 1))
+ef = EfficientFrontier(mu, S, weight_bounds=(0, 0.5))
 ef.min_volatility()
 weights_min_volatility = ef.clean_weights()
 
 print(f'Portfolio weights for min volatility optimisation (lowest level of risk): {json.dumps(weights_min_volatility, indent=4, sort_keys=True)} \n')
 print(f'Portfolio performance: {ef.portfolio_performance(verbose=True, risk_free_rate=0.00)} \n')
 # Risk-free rate : 10Y TBonds rate on 21-Jul-2021 https://www.cnbc.com/quotes/US10Y
-ef.portfolio_performance(verbose=True, risk_free_rate=0.00); 
+ef.portfolio_performance(verbose=False, risk_free_rate=0.00); 
 plt.figure()
 pd.Series(weights_min_volatility).plot.barh(title = 'Optimal Portfolio Weights (min volatility) by PyPortfolioOpt');
 
-ef = EfficientFrontier(mu, S, weight_bounds=(0, 1))
+ef = EfficientFrontier(mu, S, weight_bounds=(0, 0.5))
 ef.max_sharpe(risk_free_rate=0.00)
 weights_max_sharpe = ef.clean_weights()
 
 print(f'Portfolio weights for max Sharpe): {json.dumps(weights_max_sharpe, indent=4, sort_keys=True)} \n')
 print(f'Portfolio performance: {ef.portfolio_performance(verbose=True, risk_free_rate=0.00)} \n')
 weight_arr = ef.weights
-ef.portfolio_performance(verbose=True, risk_free_rate=0.00); 
+ef.portfolio_performance(verbose=False, risk_free_rate=0.00); 
 plt.figure()
 pd.Series(weights_max_sharpe).plot.barh(title = 'Optimal Portfolio Weights (max Sharpe) by PyPortfolioOpt');
+
+ef = EfficientFrontier(mu, S, weight_bounds=(0, 0.5))
+ef.efficient_return(0.1, market_neutral=False)
+weights_max_return = ef.clean_weights()
+
+print(f'Portfolio weights for max Return): {json.dumps(weights_max_return, indent=4, sort_keys=True)} \n')
+print(f'Portfolio performance: {ef.portfolio_performance(verbose=True, risk_free_rate=0.00)} \n')
+ef.portfolio_performance(verbose=False, risk_free_rate=0.00); 
+plt.figure()
+pd.Series(weights_max_return).plot.barh(title = 'Optimal Portfolio Weights (max Return) by PyPortfolioOpt');
 
 
 returns = expected_returns.returns_from_prices(df.set_index('Date')).dropna()
@@ -153,7 +163,7 @@ print("CVaR: {:.2f}%".format(100*cvar))
 
 from pypfopt import CLA, plotting
 
-cla = CLA(mu, S)
+cla = CLA(mu, S, weight_bounds=(0, 0.5))
 cla.max_sharpe()
 # cla.portfolio_performance(verbose=True, risk_free_rate=0.00);
 
@@ -197,4 +207,4 @@ plt.show()
 plt.figure()
 ax.set_title("Pie Chart of Optimal Portfolio Weights")
 plt.title('Pie Chart for MAx Sharpe')
-plt.pie(weights_max_sharpe .values(), labels=weights_max_sharpe.keys(), autopct='%1.1f%%', shadow=True, startangle=90)
+plt.pie(weights_max_sharpe .values(), labels=weights_max_sharpe.keys(), autopct='%1.1f%%', shadow=True, startangle=90) 
