@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jun  2 14:02:48 2022
-
-@author: lawre
+@author: LorenzoBaggi
+The script is created relying on:
+https://pypi.org/project/pyportfolioopt/
 """
 
-"Provide the tickers that you want and you'll find"
-"value at risk, performances, efficient frontier, etc"
-
+"Insert the tickers that you want, insert the time-spane and you'll find"
+"value at risk, efficient frontier, correlation matrix, maxsharpe weights"
+"and performances, min volatility weights and performances, target return"
+"weigths and performances."
+"Below you'll find a slightly modified version of the Buy and Hold Golden"
+"Butterfly portfolio"."
 
 import pandas as pd
 import yfinance as yf
@@ -16,7 +19,6 @@ from pandas_datareader import data as pdr
 import datetime as dt
 import seaborn as sns
 import matplotlib.pyplot as plt
-
 
 # Performance of your Portfolio
 print("Elaborating ... ")
@@ -36,13 +38,11 @@ def portfolioPerformance(weights, meanReturns, covMatrix):
             np.dot(weights.T,np.dot(covMatrix, weights))
            )*np.sqrt(252)
     return returns, std
-
-
     
 stocks = [stock for stock in TICKERS]
 weights = np.array([0.2, 0.2, 0.2, 0.2, 0.1, 0.1])
 
-# Seleziona il periodo del tuo investimento e fai che combaci con quello in History Prices
+# Choouse the investment period of your portfolio
 endDate = dt.datetime(2022,5,27)
 startDate = dt.datetime(1997,1,1)
 
@@ -52,7 +52,7 @@ returns, std = portfolioPerformance(weights, meanReturns, covMatrix)
 SR = (returns)/std
 print("The SR of the provided portfolio, with Risk Free Rate = 1.02% is:", SR)
 
-# Optimization 
+# Here comes the optimization process 
 INVESTMENT = 10000 
 
 pd.set_option('display.max_colwidth', None)
@@ -68,7 +68,8 @@ for i,ticker in enumerate(TICKERS):
   # Get max history of prices
   #historyPrices = yticker.history(period='max')
   historyPrices = yticker.history(start="1997-01-01", end="2022-05-27")
-  # generate features for historical prices, and what we want to predict
+  # Generate features for historical prices, and what we want to predict
+
   historyPrices['Ticker'] = ticker
   historyPrices['Year']= historyPrices.index.year
   historyPrices['Month'] = historyPrices.index.month
@@ -96,7 +97,7 @@ print(stocks_prices.Date.max())
 df = stocks_prices.pivot('Date','Ticker','Close').reset_index()
 # print(df.tail(5))
 
-# Correlation figure
+# Correlation matrix
 df.corr()
 corr = df.corr()
 mask = np.zeros_like(corr)
@@ -104,9 +105,7 @@ mask[np.triu_indices_from(mask)] = True
 with sns.axes_style("white"):
     f, ax = plt.subplots(figsize=(7, 5))
     ax = sns.heatmap(corr, mask=mask, vmax=.3, square=True, annot=True, cmap='RdYlGn')
-    
-    
-
+   
 from pypfopt import risk_models
 from pypfopt import plotting
 
