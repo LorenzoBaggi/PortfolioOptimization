@@ -19,7 +19,8 @@ import matplotlib.pyplot as plt
 
 
 # Performance of your Portfolio
-TICKERS =['SPY', 'GLD', 'TLT', 'DBC', 'IEF', 'BTC-USD']
+print("Elaborating ... ")
+TICKERS =['SHY', 'TLT', 'VTI', 'IWN', 'GLD', 'BTC-USD']
 
 def getData(stocks, start, end):
     stockData = pdr.get_data_yahoo(stocks, start=start, end=end)
@@ -39,7 +40,7 @@ def portfolioPerformance(weights, meanReturns, covMatrix):
 
     
 stocks = [stock for stock in TICKERS]
-weights = np.array([0.30, 0.40, 0.15, 0.075, 0.070, 0.005])
+weights = np.array([0.2, 0.2, 0.2, 0.2, 0.1, 0.1])
 
 # Seleziona il periodo del tuo investimento e fai che combaci con quello in History Prices
 endDate = dt.datetime(2022,5,27)
@@ -48,7 +49,7 @@ startDate = dt.datetime(1997,1,1)
 meanReturns, covMatrix = getData(stocks, start=startDate, end=endDate)
 returns, std = portfolioPerformance(weights, meanReturns, covMatrix)
 
-SR = (returns-0.012)/std
+SR = (returns)/std
 print("The SR of the provided portfolio, with Risk Free Rate = 1.02% is:", SR)
 
 # Optimization 
@@ -95,6 +96,17 @@ print(stocks_prices.Date.max())
 df = stocks_prices.pivot('Date','Ticker','Close').reset_index()
 # print(df.tail(5))
 
+# Correlation figure
+df.corr()
+corr = df.corr()
+mask = np.zeros_like(corr)
+mask[np.triu_indices_from(mask)] = True
+with sns.axes_style("white"):
+    f, ax = plt.subplots(figsize=(7, 5))
+    ax = sns.heatmap(corr, mask=mask, vmax=.3, square=True, annot=True, cmap='RdYlGn')
+    
+    
+
 from pypfopt import risk_models
 from pypfopt import plotting
 
@@ -135,7 +147,7 @@ plt.figure()
 pd.Series(weights_max_sharpe).plot.barh(title = 'Optimal Portfolio Weights (max Sharpe) by PyPortfolioOpt');
 
 ef = EfficientFrontier(mu, S, weight_bounds=(0, 0.5))
-ef.efficient_return(0.1, market_neutral=False)
+ef.efficient_return(0.2, market_neutral=False)
 weights_max_return = ef.clean_weights()
 
 print(f'Portfolio weights for max Return): {json.dumps(weights_max_return, indent=4, sort_keys=True)} \n')
@@ -170,7 +182,7 @@ cla.max_sharpe()
 plt.figure()
 ax = plotting.plot_efficient_frontier(cla, showfig=False)
 
-n_samples = 10000
+n_samples = 1000
 w = np.random.dirichlet(np.ones(len(mu)), n_samples)
 rets = w.dot(mu)
 stds = np.sqrt((w.T * (S @ w.T)).sum(axis=0))
@@ -191,9 +203,11 @@ ef = EfficientFrontier(mu, S)
 ef.max_sharpe()
 weight_arr = ef.weights
 ret_tangent, std_tangent, _ = ef.portfolio_performance()
-ax.scatter(std_tangent, ret_tangent, marker="*", s=100, c="r", label="Max Sharpe")
 # Plot random portfolios
 ax.scatter(stds, rets, marker=".", c=sharpes, cmap="viridis_r")
+ax.scatter(std_tangent, ret_tangent, marker="*", s=100, c="r", label="Max Sharpe")
+
+
 
 # Format
 ax.set_title("PyPortfolioOpt: Efficient Frontier with random portfolios")
@@ -206,5 +220,5 @@ plt.show()
 # Data to plot
 plt.figure()
 ax.set_title("Pie Chart of Optimal Portfolio Weights")
-plt.title('Pie Chart for MAx Sharpe')
-plt.pie(weights_max_sharpe .values(), labels=weights_max_sharpe.keys(), autopct='%1.1f%%', shadow=True, startangle=90) 
+plt.title('Pie Chart for Max Sharpe')
+plt.pie(weights_max_sharpe .values(), labels=weights_max_sharpe.keys(), autopct='%1.1f%%', shadow=True, startangle=90, normalize=False)
