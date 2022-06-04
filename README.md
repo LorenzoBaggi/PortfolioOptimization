@@ -3,7 +3,7 @@
 Welcome to the PortfolioOptimization wiki!
 
 Hi! 
-I developed a Python where you can compute:
+I developed a simple script using primarily PyOptPortfolio where you can compute:
 
 Sharpe Ratio of your favourite portfolio
 Calculate the assets allocations to have both max. Sharpe and min. volatility 
