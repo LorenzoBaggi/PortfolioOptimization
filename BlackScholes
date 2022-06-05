@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
-"""
-@author: lawre
-This script introduces factors affecting the options price and 
-a famous option pricing model including input parameters, assumptions and the formula.
-"""
+
+
+#This script introduces factors affecting the options price and 
+#a famous option pricing model including input parameters, assumptions and the formula.
+
 import numpy as np
 import matplotlib.pyplot as plt
 from math import log, sqrt, exp, pi
