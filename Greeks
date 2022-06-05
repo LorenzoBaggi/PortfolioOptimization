@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-In this scripy we discussed various Greeks,
+In this script we discussed various Greeks,
 their meanings and their implications on the pricing 
 and hedging of derivatives. We also presented some 
 useful formulas for calculating the Greeks value of
