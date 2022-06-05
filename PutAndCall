@@ -1,0 +1,30 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Jun  5 15:42:19 2022
+
+@author: lawre
+"""
+import numpy as np
+import matplotlib.pyplot as plt
+
+price = np.arange(900,1000,1)
+strike = 940
+premium = 7.5
+payoff = [max(-premium, i - strike-premium) for i in price] 
+plt.figure()
+plt.plot(price, payoff)
+plt.xlabel('Price at T S_T ($)')
+plt.ylabel('payoff')
+plt.title('Call option Payoff at Expiry')
+plt.grid(True)
+
+price = np.arange(900,1000,1)
+strike = 960
+premium = 19.5
+payoff = [max(-premium, strike - i -premium) for i in price] 
+plt.figure()
+plt.plot(price, payoff)
+plt.xlabel('Price at T S_T ($)')
+plt.ylabel('payoff')
+plt.title('Put option Payoff at Expiry')
+plt.grid(True)
