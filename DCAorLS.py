@@ -3,12 +3,17 @@ import pandas as pd
 import yfinance as yf
 import matplotlib.pyplot as plt
 
-start_array = ['2012-12-31','2014-12-31','2015-12-31', '2016-12-31', '2017-12-31', '2018-12-31', '2020-12-31', '2021-12-31']
+start_array = ['2015-12-30', '2016-04-30', '2016-06-30', '2016-08-30', '2016-12-30', '2017-04-30', '2017-06-30',\
+     '2017-08-30', '2017-12-30', '2018-04-30', '2018-06-30', '2018-08-30',\
+     '2018-12-30', '2019-04-30', '2019-06-30', '2019-08-30', '2019-12-30',\
+        '2020-04-30','2020-06-30', '2020-08-30', '2020-12-30']
 df_total = pd.DataFrame()
+LS_ret = []
+DCA_ret = []
 
 #dowloading data
 for i in range(0,len(start_array)):
-    df = yf.download('BTC-USD', start = start_array[i])
+    df = yf.download('DOGE-USD', start = start_array[i])
     # identifying the buying dates, assuming buying 1 per month
     # no more than 10k invested
     total_investment = 10000
@@ -39,7 +44,30 @@ for i in range(0,len(start_array)):
     wealth_DCA = (df_tog.share_amt_DCA * df_tog.Close)/1000
     wealth_LS = (df_tog.share_amt_LS * df_tog.Close)/1000
 
+    LS_ret_i = (wealth_LS[-1]/wealth_LS[0] - 1 ) * 100
+    LS_ret.append(LS_ret_i)
+    DCA_ret_i = (wealth_DCA[-1]/wealth_LS[0] - 1 ) * 100
+    DCA_ret.append(DCA_ret_i)
+
     df_recap = pd.concat([wealth_DCA, wealth_LS], axis = 1)
     df_total = pd.concat([df_total, df_recap], axis = 1)
 
-df_total.to_excel('appended.xlsx')
+
+#df_total.to_excel('appended.xlsx')
+print(LS_ret)
+print(DCA_ret)
+
+fig = plt.figure()
+ax1 = fig.add_subplot(2, 1, 1)
+ax2 = fig.add_subplot(2, 1, 2)
+
+n, bins, patches = ax1.hist(LS_ret)
+ax1.set_xlabel('LS ret')
+ax1.set_ylabel('Frequency')
+
+n, bins, patches = ax2.hist(DCA_ret)
+ax2.set_xlabel('DCA ret')
+ax2.set_ylabel('Frequency')
+plt.show()
+
+
